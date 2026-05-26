@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GITMATRIX — ENTER THE SYSTEM</title>
+
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      scroll-behavior:smooth;
+    }
+
+    :root{
+      --green:#00ff88;
+      --green2:#00ff41;
+      --dark:#020202;
+      --glass:rgba(255,255,255,0.05);
+    }
+
+    body{
+      background:black;
+      color:white;
+      overflow-x:hidden;
+      font-family:'Rajdhani',sans-serif;
+    }
+
+    canvas{
+      position:fixed;
+      top:0;
+      left:0;
+      z-index:-5;
+    }
+
+    .noise{
+      position:fixed;
+      width:100%;
+      height:100%;
+      background:url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+      opacity:.06;
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .scanline{
+      position:fixed;
+      inset:0;
+      background:linear-gradient(
+        rgba(255,255,255,.03) 50%,
+        transparent 50%
+      );
+      background-size:100% 4px;
+      pointer-events:none;
+      z-index:999;
+      opacity:.2;
+    }
+
+    .glow{
+      text-shadow:
+      0 0 10px var(--green),
+      0 0 20px var(--green),
+      0 0 40px var(--green);
+    }
+
+    .glass{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(0,255,136,.25);
+      backdrop-filter:blur(12px);
+      box-shadow:
+      0 0 25px rgba(0,255,136,.08),
+      inset 0 0 20px rgba(0,255,136,.03);
+    }
+
+    .hero{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      width:1200px;
+      height:1200px;
+      border-radius:50%;
+      background:radial-gradient(circle,var(--green) 0%,transparent 70%);
+      opacity:.08;
+      filter:blur(80px);
+      animation:pulse 6s infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{
+        transform:scale(1);
+      }
+      50%{
+        transform:scale(1.15);
+      }
+    }
+
+    .logo{
+      width:180px;
+      filter:
+      drop-shadow(0 0 15px var(--green))
+      drop-shadow(0 0 50px var(--green));
+      animation:float 4s ease-in-out infinite;
+    }
+
+    @keyframes float{
+      0%,100%{
+        transform:translateY(0px);
+      }
+      50%{
+        transform:translateY(-20px);
+      }
+    }
+
+    h1{
+      font-family:'Orbitron',sans-serif;
+      font-size:7rem;
+      font-weight:900;
+      letter-spacing:8px;
+      color:white;
+      margin-top:30px;
+      text-shadow:
+      0 0 10px var(--green),
+      0 0 30px var(--green),
+      0 0 60px var(--green);
+    }
+
+    .subtitle{
+      color:#9dffcf;
+      margin-top:25px;
+      font-size:1.5rem;
+      max-width:850px;
+      line-height:1.8;
+    }
+
+    .terminal{
+      margin-top:40px;
+      display:inline-block;
+      padding:25px;
+      text-align:left;
+      border-radius:20px;
+      font-family:'JetBrains Mono',monospace;
+      color:var(--green);
+      width:700px;
+      max-width:90%;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .terminal::before{
+      content:"";
+      position:absolute;
+      width:100%;
+      height:2px;
+      background:var(--green);
+      top:0;
+      left:-100%;
+      animation:scan 3s linear infinite;
+    }
+
+    @keyframes scan{
+      to{
+        left:100%;
+      }
+    }
+
+    .buttons{
+      display:flex;
+      gap:25px;
+      justify-content:center;
+      margin-top:50px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:18px 40px;
+      border:1px solid var(--green);
+      color:var(--green);
+      text-decoration:none;
+      font-weight:700;
+      letter-spacing:2px;
+      transition:.35s;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .btn::before{
+      content:"";
+      position:absolute;
+      width:0%;
+      height:100%;
+      left:0;
+      top:0;
+      background:var(--green);
+      z-index:-1;
+      transition:.35s;
+    }
+
+    .btn:hover::before{
+      width:100%;
+    }
+
+    .btn:hover{
+      color:black;
+      box-shadow:0 0 35px var(--green);
+      transform:translateY(-4px);
+    }
+
+    section{
+      padding:120px 8%;
+      position:relative;
+    }
+
+    .section-title{
+      font-size:4rem;
+      text-align:center;
+      margin-bottom:80px;
+      font-family:'Orbitron';
+      color:white;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:30px;
+    }
+
+    .card{
+      padding:45px;
+      border-radius:25px;
+      transition:.4s;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card:hover{
+      transform:translateY(-12px) scale(1.03);
+      box-shadow:0 0 40px rgba(0,255,136,.25);
+    }
+
+    .card h3{
+      font-size:1.6rem;
+      margin-bottom:20px;
+      color:#b4ffd8;
+    }
+
+    .big{
+      font-size:4rem;
+      font-weight:900;
+      color:white;
+      text-shadow:0 0 20px var(--green);
+    }
+
+    .about{
+      max-width:1200px;
+      margin:auto;
+      padding:70px;
+      border-radius:35px;
+      text-align:center;
+      font-size:1.4rem;
+      line-height:2;
+      color:#c5ffe0;
+    }
+
+    .ecosystem{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:35px;
+    }
+
+    .eco-card{
+      padding:45px;
+      border-radius:30px;
+      transition:.4s;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .eco-card:hover{
+      transform:translateY(-10px);
+      box-shadow:0 0 45px rgba(0,255,136,.3);
+    }
+
+    .eco-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg,transparent,rgba(0,255,136,.08));
+      opacity:0;
+      transition:.4s;
+    }
+
+    .eco-card:hover::before{
+      opacity:1;
+    }
+
+    .eco-card h3{
+      font-size:2.2rem;
+      margin-bottom:20px;
+      color:white;
+    }
+
+    .eco-card p{
+      color:#baffd9;
+      line-height:1.8;
+    }
+
+    .portal{
+      width:400px;
+      height:400px;
+      margin:auto;
+      border-radius:50%;
+      border:3px solid var(--green);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      animation:rotate 12s linear infinite;
+      box-shadow:
+      0 0 40px var(--green),
+      inset 0 0 40px var(--green);
+    }
+
+    .portal::before{
+      content:"";
+      position:absolute;
+      width:320px;
+      height:320px;
+      border-radius:50%;
+      border:2px solid rgba(0,255,136,.5);
+    }
+
+    .portal::after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      background:radial-gradient(circle,var(--green),transparent);
+      opacity:.25;
+      border-radius:50%;
+      filter:blur(20px);
+    }
+
+    @keyframes rotate{
+      from{
+        transform:rotate(0deg);
+      }
+      to{
+        transform:rotate(360deg);
+      }
+    }
+
+    .portal-text{
+      position:absolute;
+      text-align:center;
+      z-index:5;
+    }
+
+    .portal-text h2{
+      font-size:3rem;
+      font-family:'Orbitron';
+      text-shadow:0 0 20px var(--green);
+    }
+
+    .x-section{
+      text-align:center;
+    }
+
+    .x-card{
+      max-width:700px;
+      margin:auto;
+      padding:50px;
+      border-radius:30px;
+      position:relative;
+    }
+
+    .x-card img{
+      width:90px;
+      border-radius:50%;
+      margin-bottom:20px;
+      border:2px solid var(--green);
+      box-shadow:0 0 25px var(--green);
+    }
+
+    .x-btn{
+      display:inline-block;
+      margin-top:25px;
+      color:black;
+      background:var(--green);
+      padding:15px 35px;
+      text-decoration:none;
+      font-weight:700;
+      border-radius:12px;
+      transition:.3s;
+    }
+
+    .x-btn:hover{
+      transform:scale(1.08);
+      box-shadow:0 0 30px var(--green);
+    }
+
+    footer{
+      padding:80px 20px;
+      text-align:center;
+      border-top:1px solid rgba(0,255,136,.2);
+      color:#8cffc5;
+    }
+
+    footer h2{
+      font-family:'Orbitron';
+      margin-bottom:15px;
+      font-size:2rem;
+    }
+
+    @media(max-width:768px){
+
+      h1{
+        font-size:3.6rem;
+      }
+
+      .subtitle{
+        font-size:1rem;
+      }
+
+      .portal{
+        width:260px;
+        height:260px;
+      }
+
+      .portal::before{
+        width:200px;
+        height:200px;
+      }
+
+      .section-title{
+        font-size:2.5rem;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <canvas id="matrix"></canvas>
+
+  <div class="noise"></div>
+  <div class="scanline"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+
+    <div>
+
+      <img
+        src="https://i.imgur.com/Fuffjg9.jpeg"
+        class="logo"
+      >
+
+      <h1 class="glow">
+        GITMATRIX
+      </h1>
+
+      <p class="subtitle">
+        The cyber-native ecosystem for AI agents, developers,
+        digital rebels, and the future of autonomous systems.
+        Welcome to the network beyond reality.
+      </p>
+
+      <div class="terminal glass">
+
+        > INITIALIZING GITMATRIX... <br><br>
+
+        > ACCESS GRANTED <br><br>
+
+        > CONNECTING TO THE CORE <br><br>
+
+        > AI NETWORK ONLINE <br><br>
+
+        > THE SYSTEM NEVER SLEEPS
+
+      </div>
+
+      <div class="buttons">
+
+        <a href="#ecosystem" class="btn">
+          ENTER SYSTEM
+        </a>
+
+        <a
+          href="https://x.com/tylerbroqs"
+          target="_blank"
+          class="btn"
+        >
+          JOIN NETWORK
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- STATUS -->
+  <section>
+
+    <h2 class="section-title glow">
+      SYSTEM STATUS
+    </h2>
+
+    <div class="stats">
+
+      <div class="card glass">
+        <h3>ACTIVE NODES</h3>
+        <div class="big">2048+</div>
+      </div>
+
+      <div class="card glass">
+        <h3>AI AGENTS</h3>
+        <div class="big">99.9%</div>
+      </div>
+
+      <div class="card glass">
+        <h3>NETWORK POWER</h3>
+        <div class="big">∞</div>
+      </div>
+
+      <div class="card glass">
+        <h3>SECURITY</h3>
+        <div class="big">ONLINE</div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ABOUT -->
+  <section>
+
+    <div class="about glass">
+
+      <h2 class="section-title glow">
+        ABOUT GITMATRIX
+      </h2>
+
+      GitMatrix is not just a platform.
+      It is a cybernetic ecosystem where artificial intelligence,
+      decentralized systems, immersive interfaces, and digital
+      infrastructure merge into one unstoppable network.
+      Built for the next generation of creators and autonomous agents.
+
+    </div>
+
+  </section>
+
+  <!-- ECOSYSTEM -->
+  <section id="ecosystem">
+
+    <h2 class="section-title glow">
+      ECOSYSTEM
+    </h2>
+
+    <div class="ecosystem">
+
+      <div class="eco-card glass">
+        <h3>GitAI</h3>
+        <p>
+          Advanced autonomous intelligence engine
+          connected directly to the Matrix core.
+        </p>
+      </div>
+
+      <div class="eco-card glass">
+        <h3>GitOS</h3>
+        <p>
+          Futuristic cyber-native operating environment
+          for next-gen systems and builders.
+        </p>
+      </div>
+
+      <div class="eco-card glass">
+        <h3>GitPortal</h3>
+        <p>
+          Gateway into decentralized digital dimensions
+          and immersive AI infrastructure.
+        </p>
+      </div>
+
+      <div class="eco-card glass">
+        <h3>GitAgents</h3>
+        <p>
+          Autonomous digital entities capable of evolving,
+          learning, and operating independently.
+        </p>
+      </div>
+
+      <div class="eco-card glass">
+        <h3>GitChain</h3>
+        <p>
+          Ultra-fast cyber synchronization layer powering
+          the future network economy.
+        </p>
+      </div>
+
+      <div class="eco-card glass">
+        <h3>GitCore</h3>
+        <p>
+          The neural center of the GitMatrix ecosystem,
+          controlling system-wide intelligence.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- PORTAL -->
+  <section>
+
+    <h2 class="section-title glow">
+      MATRIX PORTAL
+    </h2>
+
+    <div class="portal">
+
+      <div class="portal-text">
+        <h2>ENTER</h2>
+        <p>THE CORE</p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- X -->
+  <section class="x-section">
+
+    <h2 class="section-title glow">
+      JOIN THE NETWORK
+    </h2>
+
+    <div class="x-card glass">
+
+      <img src="https://i.imgur.com/Fuffjg9.jpeg">
+
+      <h2 style="font-size:3rem;" class="glow">
+        @tylerbroqs
+      </h2>
+
+      <p style="margin-top:20px;color:#c9ffe3;font-size:1.2rem;">
+        Follow the signal. Enter the future.
+        Connect with the GitMatrix cyber network.
+      </p>
+
+      <a
+        href="https://x.com/tylerbroqs"
+        target="_blank"
+        class="x-btn"
+      >
+        OPEN X NETWORK
+      </a>
+
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+
+    <h2 class="glow">
+      GITMATRIX © 2026
+    </h2>
+
+    <p>
+      THE SYSTEM NEVER SLEEPS
+    </p>
+
+  </footer>
+
+  <!-- MATRIX EFFECT -->
+  <script>
+
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters =
+    "アァカサタナハマヤャラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const drops = [];
+
+    for(let x = 0; x < columns; x++){
+      drops[x] = 1;
+    }
+
+    function draw(){
+
+      ctx.fillStyle = "rgba(0,0,0,0.05)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      ctx.fillStyle = "#00ff88";
+      ctx.font = fontSize + "px monospace";
+
+      for(let i = 0; i < drops.length; i++){
+
+        const text =
+        letters[Math.floor(Math.random()*letters.length)];
+
+        ctx.fillText(
+          text,
+          i * fontSize,
+          drops[i] * fontSize
+        );
+
+        if(
+          drops[i] * fontSize > canvas.height &&
+          Math.random() > 0.975
+        ){
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw,35);
+
+    window.addEventListener("resize", () => {
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+    });
+
+    // GSAP ANIMATION
+
+    gsap.from("h1",{
+      y:80,
+      opacity:0,
+      duration:1.5
+    });
+
+    gsap.from(".subtitle",{
+      y:40,
+      opacity:0,
+      duration:1.5,
+      delay:.3
+    });
+
+    gsap.from(".terminal",{
+      scale:.8,
+      opacity:0,
+      duration:1.2,
+      delay:.6
+    });
+
+    gsap.from(".btn",{
+      y:30,
+      opacity:0,
+      stagger:.2,
+      duration:1,
+      delay:1
+    });
+
+  </script>
+
+</body>
+</html>
